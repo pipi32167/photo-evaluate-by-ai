@@ -29,6 +29,7 @@ const PhotoUpload = () => {
                     <p>Analyzing photo...</p>
                 </div>
             `);
+            setError('');
         }
     };
 
@@ -73,6 +74,7 @@ const PhotoUpload = () => {
                 <h2>Analysis Result:</h2>
                 <div class="markdown-content">${markdownContent}</div>
             `);
+            setError('')
         } catch (error) {
             handleError(error);
         } finally {
