@@ -1,18 +1,12 @@
-import { createRouter } from 'next-connect';
-const fs = require('fs');
-const { OpenAI } = require('openai');
-
+import fs from 'fs';
+import { OpenAI } from 'openai';
 
 export async function photo_evaluate({ image_path }: { image_path: string }) {
-    // Your evaluation logic here
-    // For example, return a dummy response
-    // return `Evaluation result for image: ${image_path}`;
-    
     // Initialize OpenAI client
     const openai = new OpenAI({
-        baseURL: process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1',
+        baseURL: process.env.OPENAI_API_BASE_URL,
         apiKey: process.env.OPENAI_API_KEY,
-        default_headers:  {"x-foo": "true"},
+        defaultHeaders: {"x-foo": "true"},
     });
 
     // Read and encode image
@@ -141,7 +135,7 @@ export async function photo_evaluate({ image_path }: { image_path: string }) {
     // Call OpenAI API
     const response = await openai.chat.completions.create({
         
-        model: process.env.OPENAI_API_MODEL,
+        model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
         messages: [
             {
                 role: "user",

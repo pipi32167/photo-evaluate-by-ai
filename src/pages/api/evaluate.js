@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { createRouter } from 'next-connect';
 import multer from 'multer';
 import { photo_evaluate } from '../../utils/llm_score';
@@ -25,17 +27,15 @@ router.post(async (req, res) => {
         }
 
         // Save file to a temporary location
-        const fs = require('fs').promises;
-        const path = require('path');
         const tempFilePath = path.join('/tmp', imageFile.originalname);
 
-        await fs.writeFile(tempFilePath, imageFile.buffer);
+        await fs.promises.writeFile(tempFilePath, imageFile.buffer);
 
         // Call the evaluation function
         const response = await photo_evaluate({ image_path: tempFilePath });
 
         // Remove the temporary file
-        await fs.unlink(tempFilePath);
+        await fs.promises.unlink(tempFilePath);
 
         // Ensure we send a response
         return res.status(200).json({ result: response });
