@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
 import { marked } from 'marked';
+import html2canvas from 'html2canvas';
 
 const PhotoUpload = () => {
     const [previewSrc, setPreviewSrc] = useState(null);
@@ -82,6 +83,39 @@ const PhotoUpload = () => {
         }
     };
 
+    const handleShare = async () => {
+        const element = document.querySelector('.container');
+        if (!element) return;
+
+        // Add temporary padding to the container
+        element.style.padding = '20px';
+        element.style.boxSizing = 'border-box';
+
+        try {
+            const canvas = await html2canvas(element, {
+                scale: 2, // Increase the scale for better quality on mobile
+                windowWidth: 375, // Set the width to a common mobile screen width
+            });
+
+            // Remove the temporary padding
+            element.style.padding = '';
+            element.style.boxSizing = '';
+
+            const imgData = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'photo-analysis.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error generating screenshot:', error);
+            // Remove the temporary padding in case of an error
+            element.style.padding = '';
+            element.style.boxSizing = '';
+        }
+    };
+
     return (
         <div className="container">
             <img id="preview" src={previewSrc} alt="Preview" style={{ display: previewSrc ? 'block' : 'none' }} />
@@ -91,6 +125,9 @@ const PhotoUpload = () => {
                 <input type="file" id="photoInput" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
                 <button className="button" onClick={() => document.getElementById('photoInput').click()} disabled={isLoading}>
                     {isLoading ? 'Analyzing...' : 'Select & Analyze Photo'}
+                </button>
+                <button className="button" onClick={handleShare} disabled={isLoading || !result}>
+                    Share
                 </button>
             </div>
         </div>
