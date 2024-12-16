@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
+import QRCode from 'qrcode-generator';
 
 const PhotoUpload = () => {
     const [previewSrc, setPreviewSrc] = useState(null);
@@ -83,24 +84,43 @@ const PhotoUpload = () => {
         }
     };
 
+    const generateQRCode = (text) => {
+        const qr = QRCode(0, 'M');
+        qr.addData(text);
+        qr.make();
+        return qr.createDataURL(4);
+    };
+
     const handleShare = async () => {
         const element = document.querySelector('.container');
         if (!element) return;
-
+    
         // Add temporary padding to the container
         element.style.padding = '20px';
         element.style.boxSizing = 'border-box';
-
+    
+        // Create a QR code
+        const qrCodeSrc = generateQRCode('https://photo-evaluate-by-ai.vercel.app/'); // Replace with your desired URL
+        const qrCodeImg = document.createElement('img');
+        qrCodeImg.src = qrCodeSrc;
+        // qrCodeImg.style.position = 'absolute';
+        qrCodeImg.style.bottom = '10px';
+        qrCodeImg.style.left = '10px';
+        qrCodeImg.style.width = '100px';
+        qrCodeImg.style.height = '100px';
+        element.appendChild(qrCodeImg);
+    
         try {
             const canvas = await html2canvas(element, {
                 scale: 2, // Increase the scale for better quality on mobile
                 windowWidth: 375, // Set the width to a common mobile screen width
             });
-
-            // Remove the temporary padding
+    
+            // Remove the QR code image and temporary padding
+            element.removeChild(qrCodeImg);
             element.style.padding = '';
             element.style.boxSizing = '';
-
+    
             const imgData = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = imgData;
@@ -110,11 +130,12 @@ const PhotoUpload = () => {
             document.body.removeChild(link);
         } catch (error) {
             console.error('Error generating screenshot:', error);
-            // Remove the temporary padding in case of an error
+            // Remove the QR code image and temporary padding in case of an error
+            element.removeChild(qrCodeImg);
             element.style.padding = '';
             element.style.boxSizing = '';
         }
-    };
+    };    
 
     return (
         <div className="container">
@@ -130,6 +151,56 @@ const PhotoUpload = () => {
                     Share
                 </button>
             </div>
+            {/* <style jsx>{`
+                .container {
+                    position: relative;
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    text-align: center;
+                }
+                .loading-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                }
+                .loading {
+                    border: 16px solid #f3f3f3;
+                    border-top: 16px solid #3498db;
+                    border-radius: 50%;
+                    width: 120px;
+                    height: 120px;
+                    animation: spin 2s linear infinite;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .markdown-content {
+                    margin: 20px 0;
+                }
+                .error-message {
+                    color: red;
+                }
+                .upload-btn-wrapper {
+                    margin-top: 20px;
+                }
+                .button {
+                    margin: 0 10px;
+                    padding: 10px 20px;
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                .button:disabled {
+                    background-color: #ccc;
+                    cursor: not-allowed;
+                }
+            `}</style> */}
         </div>
     );
 };
