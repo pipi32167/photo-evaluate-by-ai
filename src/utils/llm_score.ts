@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { OpenAI } from 'openai';
 
-export async function photo_evaluate({ image_path }: { image_path: string }) {
+export async function photo_evaluate({ image_path, lang }: { image_path: string, lang: string }) {
     // Initialize OpenAI client
     const openai = new OpenAI({
         baseURL: process.env.OPENAI_API_BASE_URL,
@@ -12,6 +12,7 @@ export async function photo_evaluate({ image_path }: { image_path: string }) {
     // Read and encode image
     const imageBuffer = fs.readFileSync(image_path);
     const base64Image = imageBuffer.toString('base64');
+    console.log('lang:', lang)
 
     const prompt = `
 <instruction>
@@ -40,7 +41,8 @@ export async function photo_evaluate({ image_path }: { image_path: string }) {
   - 视觉冲击力
   - 故事性
   - 创意
-  
+
+使用 ${lang} 语言来回答。
 </instruction>
 <output_example1>
 **照片描述**
@@ -150,6 +152,8 @@ export async function photo_evaluate({ image_path }: { image_path: string }) {
 这张照片整体表现不佳，构图和美感方面有待改进，建议摄影师在下次拍摄时注意构图的平衡和色彩的搭配，增加画面的层次感和视觉焦点。
 </output_example5>
     `
+
+    console.log('prompt:\n', prompt)
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({

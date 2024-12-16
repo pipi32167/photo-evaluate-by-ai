@@ -32,7 +32,7 @@ router.post(async (req, res) => {
         await fs.promises.writeFile(tempFilePath, imageFile.buffer);
 
         // Call the evaluation function
-        const response = await photo_evaluate({ image_path: tempFilePath });
+        const response = await photo_evaluate({ image_path: tempFilePath, lang: req.body.lang });
 
         // Remove the temporary file
         await fs.promises.unlink(tempFilePath);

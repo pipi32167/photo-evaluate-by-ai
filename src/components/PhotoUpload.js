@@ -14,6 +14,8 @@ const PhotoUpload = () => {
     const [error, setError] = useState('');
     const [isAnalysisSuccessful, setIsAnalysisSuccessful] = useState(false);
 
+    // console.log('i18n.language', i18n.language)
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -65,6 +67,7 @@ const PhotoUpload = () => {
         try {
             const formData = new FormData();
             formData.append('image', file);
+            formData.append('lang', i18n.language)
 
             const response = await fetch('/api/evaluate', {
                 method: 'POST',
