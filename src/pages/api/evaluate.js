@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createRouter } from 'next-connect';
 import multer from 'multer';
-import { photo_evaluate } from '../../utils/llm_score';
+import { photo_evaluate } from '@/utils/llm_score';
 
 // Configure multer to store files in memory
 const upload = multer({

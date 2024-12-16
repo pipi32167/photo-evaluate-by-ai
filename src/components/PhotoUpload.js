@@ -1,14 +1,18 @@
+// src/components/PhotoUpload.tsx
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import QRCode from 'qrcode-generator';
+import { useTranslation } from 'react-i18next';
 
 const PhotoUpload = () => {
+    const { t, i18n } = useTranslation();
     const [previewSrc, setPreviewSrc] = useState(null);
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isAnalysisSuccessful, setIsAnalysisSuccessful] = useState(false);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -28,7 +32,7 @@ const PhotoUpload = () => {
             setResult(`
                 <div class="loading-container">
                     <div class="loading"></div>
-                    <p>Analyzing photo...</p>
+                    <p>${t('analyzingPhoto')}...</p>
                 </div>
             `);
             setError('');
@@ -37,21 +41,22 @@ const PhotoUpload = () => {
 
     const handleError = (error) => {
         console.error('Error:', error);
-        let errorMessage = 'Error analyzing photo. Please try again.';
+        let errorMessage = t('errorAnalyzingPhoto');
 
         if (error.name === 'TypeError' && !navigator.onLine) {
-            errorMessage = 'Network error. Please check your internet connection.';
+            errorMessage = t('networkError');
         } else if (error.response) {
-            errorMessage = `Server error: ${error.response.status}`;
+            errorMessage = `${t('serverError')}: ${error.response.status}`;
         }
 
         setError(errorMessage);
         setResult('');
+        setIsAnalysisSuccessful(false);
     };
 
     const uploadPhoto = async (file) => {
         if (!file) {
-            setError('Please select a photo first');
+            setError(t('pleaseSelectPhoto'));
             return;
         }
 
@@ -67,16 +72,17 @@ const PhotoUpload = () => {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`${t('httpError')}! status: ${response.status}`);
             }
 
             const data = await response.json();
             const markdownContent = marked.parse(data.result);
             setResult(`
-                <h2>Analysis Result:</h2>
+                <h2>${t('analysisResult')}:</h2>
                 <div class="markdown-content">${markdownContent}</div>
             `);
-            setError('')
+            setError('');
+            setIsAnalysisSuccessful(true);
         } catch (error) {
             handleError(error);
         } finally {
@@ -103,7 +109,6 @@ const PhotoUpload = () => {
         const qrCodeSrc = generateQRCode('https://photo-evaluate-by-ai.vercel.app/'); // Replace with your desired URL
         const qrCodeImg = document.createElement('img');
         qrCodeImg.src = qrCodeSrc;
-        // qrCodeImg.style.position = 'absolute';
         qrCodeImg.style.bottom = '10px';
         qrCodeImg.style.left = '10px';
         qrCodeImg.style.width = '100px';
@@ -145,62 +150,17 @@ const PhotoUpload = () => {
             <div className="upload-btn-wrapper">
                 <input type="file" id="photoInput" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
                 <button className="button" onClick={() => document.getElementById('photoInput').click()} disabled={isLoading}>
-                    {isLoading ? 'Analyzing...' : 'Select & Analyze Photo'}
+                    {isLoading ? t('analyzing') : t('selectAndAnalyzePhoto')}
                 </button>
-                <button className="button" onClick={handleShare} disabled={isLoading || !result}>
-                    Share
-                </button>
+                {isAnalysisSuccessful && (
+                    <button className="button" onClick={handleShare} disabled={isLoading}>
+                        {t('share')}
+                    </button>
+                )}
+                {/* <button className="button" onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'fr' : 'en')}>
+                    {i18n.language === 'en' ? t('switchToFrench') : t('switchToEnglish')}
+                </button> */}
             </div>
-            {/* <style jsx>{`
-                .container {
-                    position: relative;
-                    width: 100%;
-                    max-width: 600px;
-                    margin: 0 auto;
-                    text-align: center;
-                }
-                .loading-container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100%;
-                }
-                .loading {
-                    border: 16px solid #f3f3f3;
-                    border-top: 16px solid #3498db;
-                    border-radius: 50%;
-                    width: 120px;
-                    height: 120px;
-                    animation: spin 2s linear infinite;
-                }
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .markdown-content {
-                    margin: 20px 0;
-                }
-                .error-message {
-                    color: red;
-                }
-                .upload-btn-wrapper {
-                    margin-top: 20px;
-                }
-                .button {
-                    margin: 0 10px;
-                    padding: 10px 20px;
-                    background-color: #3498db;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-                .button:disabled {
-                    background-color: #ccc;
-                    cursor: not-allowed;
-                }
-            `}</style> */}
         </div>
     );
 };

@@ -1,9 +1,12 @@
 import Head from 'next/head';
-import PhotoUpload from '../../components/PhotoUpload';
-import './globals.css';
+import PhotoUpload from '@/components/PhotoUpload';
+import '@/app/globals.css';
+import { Suspense } from 'react';
 
 const Home = () => {
     return (
+        <Suspense fallback={<div>Loading...</div>}>
+
         <div>
             <Head>
                 <title>Photo Upload and Analysis</title>
@@ -14,6 +17,7 @@ const Home = () => {
                 <PhotoUpload />
             </main>
         </div>
+        </Suspense>
     );
 };
 
