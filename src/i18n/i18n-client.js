@@ -26,7 +26,7 @@ i18n
   .use(LanguageDetector) // Optional: Use language detector
   .init({
     resources,
-    lng: 'en', // default language
+    lng: 'zh', // default language
     fallbackLng: "en", // fallback language
     interpolation: {
       escapeValue: false, // React already escapes values

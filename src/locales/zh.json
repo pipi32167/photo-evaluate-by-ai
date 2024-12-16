@@ -1,4 +1,7 @@
 {
+    "Photo Analysis": "照片分析",
+    "Photo Upload and Analysis": "照片上传与分析",
+    "Loading...": "加载中...",
     "analyzingPhoto": "分析照片",
     "errorAnalyzingPhoto": "分析照片时出错",
     "networkError": "网络错误。请检查您的连接。",

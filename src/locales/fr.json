@@ -1,4 +1,5 @@
 {
+    "Loading...": "Loading...",
     "analyzingPhoto": "Analyse de la photo",
     "errorAnalyzingPhoto": "Erreur lors de l'analyse de la photo",
     "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",

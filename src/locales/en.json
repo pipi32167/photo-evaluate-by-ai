@@ -1,4 +1,7 @@
 {
+    "Photo Analysis": "Photo Analysis",
+    "Photo Upload and Analysis": "Photo Upload and Analysis",
+    "Loading...": "Loading...",
     "analyzingPhoto": "Analyzing photo",
     "errorAnalyzingPhoto": "Error analyzing photo",
     "networkError": "Network error. Please check your connection.",
