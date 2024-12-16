@@ -1,6 +1,6 @@
 // src/components/PhotoUpload.tsx
 "use client"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import QRCode from 'qrcode-generator';

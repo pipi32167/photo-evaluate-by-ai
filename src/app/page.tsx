@@ -6,7 +6,7 @@ import '@/app/globals.css';
 import { Suspense } from 'react';
 
 const Home = () => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <Suspense fallback={<div>{t('Loading...')}</div>}>
