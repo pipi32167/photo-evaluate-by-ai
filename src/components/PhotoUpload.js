@@ -20,12 +20,53 @@ const PhotoUpload = () => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                setPreviewSrc(e.target.result);
-                uploadPhoto(file);
+            reader.onload = async (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    let resizedFile = file;
+                    if (img.width > 1024 || img.height > 1024) {
+                        resizedFile = resizeImage(file, img);
+                    }
+                    setPreviewSrc(URL.createObjectURL(resizedFile));
+                    uploadPhoto(resizedFile);
+                };
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const resizeImage = (file, img) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let ratio = 1;
+
+        if (img.width > img.height) {
+            if (img.width > 1024) {
+                ratio = 1024 / img.width;
+            }
+        } else {
+            if (img.height > 1024) {
+                ratio = 1024 / img.height;
+            }
+        }
+
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        return dataURLtoFile(canvas.toDataURL('image/jpeg', 0.8), file.name);
+    };
+
+    const dataURLtoFile = (dataurl, filename) => {
+        const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]);
+        let n = bstr.length
+        const u8arr = new Uint8Array(n)
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, {type:mime});
     };
 
     const setLoading = (loading) => {
