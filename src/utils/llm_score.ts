@@ -12,7 +12,7 @@ export async function photo_evaluate({ image_path, lang }: { image_path: string,
     // Read and encode image
     const imageBuffer = fs.readFileSync(image_path);
     const base64Image = imageBuffer.toString('base64');
-    console.log('lang:', lang)
+    // console.log('lang:', lang)
 
     const prompt = `
 <instruction>
@@ -176,7 +176,8 @@ export async function photo_evaluate({ image_path, lang }: { image_path: string,
                 ]
             }
         ],
-        max_tokens: 1024
+        max_tokens: 1024,
+        temperature: 0.1,
     });
 
     return response.choices[0].message.content;
