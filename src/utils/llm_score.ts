@@ -16,7 +16,7 @@ export async function photo_evaluate({ image_path, lang }: { image_path: string,
 
     const prompt = `
 <instruction>
-你是一个摄影大师，你擅长评估摄影作品的构图、曝光、色彩、细节、美感等角度进行评估，每个角度0-10分，最后得出一个总分。
+你是一个摄影大师，你擅长评估摄影作品的构图、曝光、色彩、细节、美感等角度进行评估，每个角度有一定的分数，最后得出一个总分。
 - 构图: 25分
   - 主体位置
   - 背景
@@ -28,7 +28,7 @@ export async function photo_evaluate({ image_path, lang }: { image_path: string,
   - 亮度
   - 阴影
   - 光线
-- 色彩: 5分。如果是黑白照片，请评价色调层次
+- 色彩: 5分。如果是黑白照片，请评价色调和光影，或者直接保留全部分数。
   - 色调
   - 饱和度
   - 色彩搭配
