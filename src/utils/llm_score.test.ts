@@ -33,18 +33,18 @@ describe('correct_total_score', () => {
         </image_review>
         `;
         
-        const expectedXml = `
-        <image_review>
-            <scoring>
-                <composition score="20" max_score="25"/>
-                <exposure score="4" max_score="5"/>
-                <color score="4" max_score="5"/>
-                <detail score="4" max_score="5"/>
-                <aesthetic_appeal score="8" max_score="10"/>
-                <total_score score="40" max_score="50"/>
-            </scoring>
-        </image_review>
-        `.trim();
+        // const expectedXml = `
+        // <image_review>
+        //     <scoring>
+        //         <composition score="20" max_score="25"/>
+        //         <exposure score="4" max_score="5"/>
+        //         <color score="4" max_score="5"/>
+        //         <detail score="4" max_score="5"/>
+        //         <aesthetic_appeal score="8" max_score="10"/>
+        //         <total_score score="40" max_score="50"/>
+        //     </scoring>
+        // </image_review>
+        // `.trim();
 
         const result = await correct_total_score(xml);
         expect(result).not.toBe(xml);
@@ -124,7 +124,7 @@ This is a good action shot capturing the energy of a marathon runner. The exposu
 </image_review>
         `
 
-        const markdown = await xml_to_markdown(xml);
+        await xml_to_markdown(xml);
     })
 });
 

@@ -59,7 +59,7 @@ export async function xml_to_markdown(xml: string): Promise<string> {
   const suggestionsForImprovement = result.image_review.suggestions_for_improvement[0].trim();
   const summary = result.image_review.summary[0].trim();
 
-  let markdown = `# Image Review
+  const markdown = `# Image Review
 
 ## Image Description
 ${imageDescription}
@@ -283,7 +283,11 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
       temperature: 0.1,
   });
 
-  return response.choices[0].message.content!!;
+  const result = response.choices[0].message.content;
+  if(!result) {
+    throw new Error(`invalid response: ${response}`)
+  }
+  return result
 }
 
 export async function photo_evaluate({ image_path, lang }: { image_path: string, lang: string }) {
