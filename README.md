@@ -22,4 +22,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## [Online demo](https://photo-evaluate-by-ai.vercel.app/)
 
-<img src="https://github.com/pipi32167/photo-evaluate-by-ai/blob/4784f8532e386c0cfb2d78d55c5e5014392db4a0/public/photo-analysis-00.png?raw=true" style="zoom:50%;" />
+| ![](https://github.com/pipi32167/photo-evaluate-by-ai/blob/main/public/photo-refactor-before.png?raw=true) | <img src="https://github.com/pipi32167/photo-evaluate-by-ai/blob/main/public/photo-refactor-after.png?raw=true"/> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+
