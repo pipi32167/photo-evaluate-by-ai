@@ -102,28 +102,50 @@ const PhotoUpload = () => {
             setError(t('pleaseSelectPhoto'));
             return;
         }
-
+    
         setLoading(true);
-
+    
         try {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('lang', i18n.language)
-
+    
             const response = await fetch('/api/evaluate', {
                 method: 'POST',
                 body: formData,
             });
-
+    
             if (!response.ok) {
                 throw new Error(`${t('httpError')}! status: ${response.status}`);
             }
-
+    
             const data = await response.json();
-            const markdownContent = marked.parse(data.result);
+            const markdownContent = marked.parse(data.result, {
+                renderer: new marked.Renderer(),
+                gfm: true,
+                tables: true,
+                breaks: false,
+                pedantic: false,
+                sanitize: false,
+                smartLists: true,
+                smartypants: false,
+                xhtml: false,
+                highlight: function (code, lang) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                },
+                langPrefix: 'hljs language-',
+                quote: false,
+                taskLists: true
+            });
+            // Adjusting markdown style for tables to have borders, centered text, and margin
+            const adjustedMarkdownContent = markdownContent.replace(/<table>/g, '<table border="1" style="width: 100%; margin: 10px 0; border-collapse: collapse;">');
+            const adjustedMarkdownContentWithCenteredText = adjustedMarkdownContent
+                .replace(/<td>/g, '<td style="text-align: center; padding: 5px;">')
+                .replace(/<th>/g, '<th style="text-align: center; padding: 5px;">');
             setResult(`
                 <h2>${t('analysisResult')}:</h2>
-                <div class="markdown-content">${markdownContent}</div>
+                <div class="markdown-content">${adjustedMarkdownContentWithCenteredText}</div>
             `);
             setError('');
             setIsAnalysisSuccessful(true);
@@ -133,7 +155,7 @@ const PhotoUpload = () => {
             setLoading(false);
         }
     };
-
+    
     const generateQRCode = (text) => {
         const qr = QRCode(0, 'M');
         qr.addData(text);
