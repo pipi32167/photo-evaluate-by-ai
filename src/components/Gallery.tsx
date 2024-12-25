@@ -1,9 +1,7 @@
 // src/components/Gallery.tsx
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { marked } from 'marked';
-import html2canvas from 'html2canvas';
-import QRCode from 'qrcode-generator';
 import { useTranslation } from 'react-i18next';
 import CryptoJS from 'crypto-js';
 
@@ -17,16 +15,22 @@ interface Photo {
     md5: string;
 }
 
+interface CustomError extends Error {
+    response?: {
+        status: number;
+    };
+}
+
 const Gallery = () => {
     const { t, i18n } = useTranslation();
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const calculateMD5 = (file) => {
+    const calculateMD5 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+                const wordArray = CryptoJS.lib.WordArray.create(e.target?.result as ArrayBuffer);
                 const md5 = CryptoJS.MD5(wordArray).toString();
                 resolve(md5);
             };
@@ -37,16 +41,17 @@ const Gallery = () => {
         });
     };
 
-    const handleFileChange = async (e) => {
+    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files.length > 0) {
-            const newPhotos = [];
-            for (const file of files) {
+        if (files && files.length > 0) {
+            const newPhotos: Photo[] = [];
+            for (const file of Array.from(files)) {
                 const md5 = await calculateMD5(file);
+                const file2 = await resizeImage(file);
                 if (!photos.some(photo => photo.md5 === md5)) {
                     newPhotos.push({
                         file,
-                        previewSrc: URL.createObjectURL(file),
+                        previewSrc: URL.createObjectURL(file2),
                         result: '',
                         isLoading: false,
                         error: '',
@@ -59,46 +64,69 @@ const Gallery = () => {
         }
     };
 
-    const resizeImage = (file, img) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        let ratio = 1;
+    // if file is too large, resize it before uploading, max width or height is 1024
+    // else return the original file
+    const resizeImage = (file: File): Promise<File> => {
 
-        if (img.width > img.height) {
-            if (img.width > 1024) {
-                ratio = 1024 / img.width;
-            }
-        } else {
-            if (img.height > 1024) {
-                ratio = 1024 / img.height;
-            }
-        }
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d')!;
+                    const MAX_WIDTH = 1024;
+                    const MAX_HEIGHT = 1024;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width < MAX_WIDTH && height < MAX_HEIGHT) {
+                        resolve(file);
+                        return;
+                    }
 
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
 
-        return dataURLtoFile(canvas.toDataURL('image/jpeg', 0.8), file.name);
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob(blob => {
+                        if (blob) {
+                            const resizedFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: Date.now()
+                            });
+                            resolve(resizedFile);
+                        } else {
+                            reject(new Error('Error resizing image'));
+                        }
+                    }, file.type);
+                };
+                img.src = e.target?.result as string;
+            };
+            reader.onerror = (e) => {
+                reject(e);
+            };
+            reader.readAsDataURL(file);
+        });
     };
 
-    const dataURLtoFile = (dataurl, filename) => {
-        const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]);
-        let n = bstr.length
-        const u8arr = new Uint8Array(n)
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
-    };
-
-    const setLoading = (index, loading) => {
+    const setLoading = (index: number, loading: boolean) => {
         setPhotos(prevPhotos => prevPhotos.map((photo, i) =>
             i === index ? { ...photo, isLoading: loading } : photo
         ));
     };
 
-    const handleError = (index, error) => {
+    const handleError = (index: number, error: CustomError) => {
         console.error('Error:', error);
         let errorMessage = t('errorAnalyzingPhoto');
 
@@ -113,7 +141,7 @@ const Gallery = () => {
         ));
     };
 
-    const uploadPhoto = async (index) => {
+    const uploadPhoto = async (index: number) => {
         const photo = photos[index];
         if (!photo.file) {
             setPhotos(prevPhotos => prevPhotos.map((p, i) =>
@@ -139,23 +167,23 @@ const Gallery = () => {
             }
 
             const data = await response.json();
-            const markdownContent = marked.parse(data.result, {
+            const markdownContent = await marked.parse(data.result, {
                 renderer: new marked.Renderer(),
                 gfm: true,
-                tables: true,
+                // tables: true,
                 breaks: false,
                 pedantic: false,
-                sanitize: false,
-                smartLists: true,
-                smartypants: false,
-                xhtml: false,
-                highlight: function (code, lang) {
-                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-                    return hljs.highlight(code, { language }).value;
-                },
-                langPrefix: 'hljs language-',
-                quote: false,
-                taskLists: true
+                // sanitize: false,
+                // smartLists: true,
+                // smartypants: false,
+                // xhtml: false,
+                // highlight: function (code, lang) {
+                //     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                //     return hljs.highlight(code, { language }).value;
+                // },
+                // langPrefix: 'hljs language-',
+                // quote: false,
+                // taskLists: true
             });
             const adjustedMarkdownContent = markdownContent.replace(/<table>/g, '<table border="1" style="width: 100%; margin: 10px 0; border-collapse: collapse;">');
             const adjustedMarkdownContentWithCenteredText = adjustedMarkdownContent
@@ -170,57 +198,9 @@ const Gallery = () => {
                 } : p
             ));
         } catch (error) {
-            handleError(index, error);
+            handleError(index, error as CustomError);
         } finally {
             setLoading(index, false);
-        }
-    };
-
-    const generateQRCode = (text) => {
-        const qr = QRCode(0, 'M');
-        qr.addData(text);
-        qr.make();
-        return qr.createDataURL(4);
-    };
-
-    const handleShare = async (index) => {
-        const element = document.querySelector('.container');
-        if (!element) return;
-
-        element.style.padding = '20px';
-        element.style.boxSizing = 'border-box';
-
-        const qrCodeSrc = generateQRCode('https://photo-evaluate-by-ai.vercel.app/');
-        const qrCodeImg = document.createElement('img');
-        qrCodeImg.src = qrCodeSrc;
-        qrCodeImg.style.bottom = '10px';
-        qrCodeImg.style.left = '10px';
-        qrCodeImg.style.width = '100px';
-        qrCodeImg.style.height = '100px';
-        element.appendChild(qrCodeImg);
-
-        try {
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                windowWidth: 375,
-            });
-
-            element.removeChild(qrCodeImg);
-            element.style.padding = '';
-            element.style.boxSizing = '';
-
-            const imgData = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = 'photo-analysis.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error generating screenshot:', error);
-            element.removeChild(qrCodeImg);
-            element.style.padding = '';
-            element.style.boxSizing = '';
         }
     };
 
@@ -247,7 +227,7 @@ const Gallery = () => {
                 {photos[currentIndex]?.error && <p className="error-message">{photos[currentIndex].error}</p>}
                 <div className="upload-btn-wrapper">
                     <input type="file" id="photoInput" accept="image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} />
-                    <button className="button" onClick={() => document.getElementById('photoInput').click()} disabled={photos[currentIndex]?.isLoading}>
+                    <button className="button" onClick={() => document.getElementById('photoInput')?.click()} disabled={photos[currentIndex]?.isLoading}>
                         {photos[currentIndex]?.isLoading ? t('analyzing') : t('selectAndAnalyzePhoto')}
                     </button>
                     {/* {photos[currentIndex]?.isAnalysisSuccessful && (

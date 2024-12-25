@@ -1,6 +1,6 @@
 "use client";
 import Head from 'next/head';
-import PhotoUpload from '@/components/PhotoUpload';
+// import PhotoUpload from '@/components/PhotoUpload';
 import { useTranslation } from 'react-i18next';
 import '@/app/globals.css';
 import { Suspense } from 'react';
