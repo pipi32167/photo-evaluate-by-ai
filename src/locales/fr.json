@@ -1,16 +1,18 @@
 {
-    "Loading...": "Loading...",
-    "analyzingPhoto": "Analyse de la photo",
-    "errorAnalyzingPhoto": "Erreur lors de l'analyse de la photo",
-    "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
-    "serverError": "Erreur serveur",
-    "httpError": "Erreur HTTP",
-    "pleaseSelectPhoto": "Veuillez sélectionner une photo",
-    "analysisResult": "Résultat de l'analyse",
-    "analyzing": "Analyse en cours...",
-    "selectAndAnalyzePhoto": "Sélectionner et analyser la photo",
-    "share": "Partager",
-    "switchToFrench": "Passer au français",
-    "switchToEnglish": "Passer à l'anglais"
-  }
-  
+  "Loading...": "Loading...",
+  "analyzingPhoto": "Analyse de la photo",
+  "errorAnalyzingPhoto": "Erreur lors de l'analyse de la photo",
+  "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+  "serverError": "Erreur serveur",
+  "httpError": "Erreur HTTP",
+  "pleaseSelectPhoto": "Veuillez sélectionner une photo",
+  "analysisResult": "Résultat de l'analyse",
+  "analyzing": "Analyse en cours...",
+  "selectAndAnalyzePhoto": "Sélectionner et analyser la photo",
+  "share": "Partager",
+  "switchToFrench": "Passer au français",
+  "switchToEnglish": "Passer à l'anglais",
+  "photoGallery": "Galerie de photos",
+  "prev": "Précédent",
+  "next": "Suivant"
+}
