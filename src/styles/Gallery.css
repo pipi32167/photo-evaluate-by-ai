@@ -1,0 +1,57 @@
+/* src/styles/Gallery.css */
+.gallery-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.gallery {
+    width: 100%;
+    max-width: 600px;
+    /* text-align: center; */
+    position: relative;
+}
+
+.gallery img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.upload-btn-wrapper {
+    margin-top: 20px;
+}
+
+.navigation-buttons {
+    /* margin-top: 20px; */
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px;
+}
+
+
+.navigation-button {
+    width: 45%;
+}
+
+
+.button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

@@ -1,18 +1,20 @@
 {
-    "Photo Analysis": "照片分析",
-    "Photo Upload and Analysis": "照片上传与分析",
-    "Loading...": "加载中...",
-    "analyzingPhoto": "分析照片",
-    "errorAnalyzingPhoto": "分析照片时出错",
-    "networkError": "网络错误。请检查您的连接。",
-    "serverError": "服务器错误",
-    "httpError": "HTTP 错误",
-    "pleaseSelectPhoto": "请选择一张照片",
-    "analysisResult": "分析结果",
-    "analyzing": "分析......",
-    "selectAndAnalyzePhoto": "选择并分析照片",
-    "share": "分享",
-    "switchToFrench": "切换到法语",
-    "switchToEnglish": "切换到英语"
-  }
-  
+  "Photo Analysis": "照片分析",
+  "Photo Upload and Analysis": "照片上传与分析",
+  "Loading...": "加载中...",
+  "analyzingPhoto": "分析照片",
+  "errorAnalyzingPhoto": "分析照片时出错",
+  "networkError": "网络错误。请检查您的连接。",
+  "serverError": "服务器错误",
+  "httpError": "HTTP 错误",
+  "pleaseSelectPhoto": "请选择一张照片",
+  "analysisResult": "分析结果",
+  "analyzing": "分析......",
+  "selectAndAnalyzePhoto": "选择并分析照片",
+  "share": "分享",
+  "switchToFrench": "切换到法语",
+  "switchToEnglish": "切换到英语",
+  "photoGallery": "照片库",
+  "prev": "上一页",
+  "next": "下一页"
+}

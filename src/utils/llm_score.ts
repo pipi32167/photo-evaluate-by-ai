@@ -97,7 +97,7 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
   // Read and encode image
   const imageBuffer = fs.readFileSync(image_path);
   const base64Image = imageBuffer.toString('base64');
-  // console.log('lang:', lang)
+  console.log('lang:', lang)
 
   const prompt = `
 <instruction>
@@ -287,6 +287,7 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
   if(!result) {
     throw new Error(`invalid response: ${response}`)
   }
+  console.log('result', result)
   return result
 }
 
