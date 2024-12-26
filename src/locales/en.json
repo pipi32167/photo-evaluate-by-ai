@@ -1,18 +1,20 @@
 {
-    "Photo Analysis": "Photo Analysis",
-    "Photo Upload and Analysis": "Photo Upload and Analysis",
-    "Loading...": "Loading...",
-    "analyzingPhoto": "Analyzing photo",
-    "errorAnalyzingPhoto": "Error analyzing photo",
-    "networkError": "Network error. Please check your connection.",
-    "serverError": "Server error",
-    "httpError": "HTTP error",
-    "pleaseSelectPhoto": "Please select a photo",
-    "analysisResult": "Analysis Result",
-    "analyzing": "Analyzing...",
-    "selectAndAnalyzePhoto": "Select and Analyze Photo",
-    "share": "Share",
-    "switchToFrench": "Switch to French",
-    "switchToEnglish": "Switch to English"
-  }
-  
+  "Photo Analysis": "Photo Analysis",
+  "Photo Upload and Analysis": "Photo Upload and Analysis",
+  "Loading...": "Loading...",
+  "analyzingPhoto": "Analyzing photo",
+  "errorAnalyzingPhoto": "Error analyzing photo",
+  "networkError": "Network error. Please check your connection.",
+  "serverError": "Server error",
+  "httpError": "HTTP error",
+  "pleaseSelectPhoto": "Please select a photo",
+  "analysisResult": "Analysis Result",
+  "analyzing": "Analyzing...",
+  "selectAndAnalyzePhoto": "Select and Analyze Photo",
+  "share": "Share",
+  "switchToFrench": "Switch to French",
+  "switchToEnglish": "Switch to English",
+  "photoGallery": "Photo Gallery",
+  "prev": "Prev",
+  "next": "Next"
+}
