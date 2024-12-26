@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import fs from 'fs';
 import { OpenAI } from 'openai';
 import * as xml2js from 'xml2js';
@@ -7,47 +8,47 @@ export function remove_code_block(s: string): string {
 
   let lines = s.split("\n")
   if (lines[0].trim().startsWith("```")) {
-    lines = lines.slice(1, lines.length-2)
+    lines = lines.slice(1, lines.length - 2)
     s = lines.join("\n")
   }
-  
+
   return s
 }
 
 export async function correct_total_score(xml: string): Promise<string> {
-    // console.log('correct_total_score:', xml)
-    xml = remove_code_block(xml)
+  // console.log('correct_total_score:', xml)
+  xml = remove_code_block(xml)
 
-    const parser = new xml2js.Parser();
-    const result = await parser.parseStringPromise(xml);
+  const parser = new xml2js.Parser();
+  const result = await parser.parseStringPromise(xml);
 
-    const scoring = result.image_review.scoring[0];
-    const totalScoreElement = scoring.total_score[0];
-    const totalScore = parseInt(totalScoreElement.$.score, 10);
+  const scoring = result.image_review.scoring[0];
+  const totalScoreElement = scoring.total_score[0];
+  const totalScore = parseInt(totalScoreElement.$.score, 10);
 
-    const scores = [
-        parseInt(scoring.composition[0].$.score, 10),
-        parseInt(scoring.exposure[0].$.score, 10),
-        parseInt(scoring.color[0].$.score, 10),
-        parseInt(scoring.detail[0].$.score, 10),
-        parseInt(scoring.aesthetic_appeal[0].$.score, 10)
-    ];
+  const scores = [
+    parseInt(scoring.composition[0].$.score, 10),
+    parseInt(scoring.exposure[0].$.score, 10),
+    parseInt(scoring.color[0].$.score, 10),
+    parseInt(scoring.detail[0].$.score, 10),
+    parseInt(scoring.aesthetic_appeal[0].$.score, 10)
+  ];
 
-    const calculatedTotalScore = scores.reduce((acc, curr) => acc + curr, 0);
+  const calculatedTotalScore = scores.reduce((acc, curr) => acc + curr, 0);
 
-    if (calculatedTotalScore === totalScore) {
-      // console.log(`Total score is correct: ${totalScore}`);
-      return xml;
-    } 
-        
-    totalScoreElement.$.score = calculatedTotalScore.toString();
-    console.log(`Total score corrected from ${totalScore} to ${calculatedTotalScore}`);
+  if (calculatedTotalScore === totalScore) {
+    // console.log(`Total score is correct: ${totalScore}`);
+    return xml;
+  }
 
-    // Convert back to XML if needed
-    const builder = new xml2js.Builder();
-    const correctedXml = builder.buildObject(result);
-    // console.log(correctedXml);
-    return correctedXml;
+  totalScoreElement.$.score = calculatedTotalScore.toString();
+  console.log(`Total score corrected from ${totalScore} to ${calculatedTotalScore}`);
+
+  // Convert back to XML if needed
+  const builder = new xml2js.Builder();
+  const correctedXml = builder.buildObject(result);
+  // console.log(correctedXml);
+  return correctedXml;
 }
 
 export async function xml_to_markdown(xml: string): Promise<string> {
@@ -87,11 +88,11 @@ ${summary}
 }
 
 async function evaluate_by_vlm(image_path: string, lang: string): Promise<string> {
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      baseURL: process.env.OPENAI_API_BASE_URL,
-      apiKey: process.env.OPENAI_API_KEY,
-      defaultHeaders: {"x-foo": "true"},
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    baseURL: process.env.OPENAI_API_BASE_URL,
+    apiKey: process.env.OPENAI_API_KEY,
+    defaultHeaders: { "x-foo": "true" },
   });
 
   // Read and encode image
@@ -102,6 +103,9 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
   const prompt = `
 <instruction>
 你是一个摄影大师，你擅长从构图、曝光、色彩、细节、美感五个方面评估摄影作品。每个方面都包含若干子项，并赋予权重，最终得出总分。输出格式按照output_format和提供的例子来输出xml。
+注意返回的标签必须闭合，例如：<image_review>...</image_review>。
+注意返回的标签必须闭合，例如：<image_review>...</image_review>。
+注意返回的标签必须闭合，例如：<image_review>...</image_review>。
 
 - 构图 (25分):  评估主体位置、背景、层次感、对称性、线条和黄金分割的运用。
   - 主体位置: 主体是否位于最佳位置，是否符合视觉中心或黄金分割原则。
@@ -260,31 +264,32 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
 
   // Call OpenAI API
   const response = await openai.chat.completions.create({
-      
-      model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
-      messages: [
+
+    model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
+    seed: randomInt(1000000),
+    messages: [
+      {
+        role: "user",
+        content: [
           {
-              role: "user",
-              content: [
-                  {
-                      type: "text",
-                      text: prompt,
-                  },
-                  {
-                      type: "image_url",
-                      image_url: {
-                          url: `data:image/jpeg;base64,${base64Image}`
-                      }
-                  }
-              ]
+            type: "text",
+            text: prompt,
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${base64Image}`
+            }
           }
-      ],
-      max_tokens: 2048,
-      temperature: 0.1,
+        ]
+      }
+    ],
+    max_tokens: 2048,
+    temperature: 0.1,
   });
 
   const result = response.choices[0].message.content;
-  if(!result) {
+  if (!result) {
     throw new Error(`invalid response: ${response}`)
   }
   console.log('result', result)
@@ -292,7 +297,7 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
 }
 
 export async function photo_evaluate({ image_path, lang }: { image_path: string, lang: string }) {
-  
+
   let result = await evaluate_by_vlm(image_path, lang)
   result = await correct_total_score(result)
   return await xml_to_markdown(result)
