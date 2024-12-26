@@ -31,7 +31,7 @@ const Gallery = () => {
         const savedPhotos = localStorage.getItem('photos');
         if (savedPhotos) {
             const parsedPhotos = JSON.parse(savedPhotos);
-            const updatedPhotos = parsedPhotos.map((photo: any) => ({
+            const updatedPhotos = parsedPhotos.map((photo: Photo) => ({
                 ...photo,
                 file: base64ToFile(photo.base64, photo.file.name, photo.file.type),
                 previewSrc: photo.base64
@@ -50,7 +50,6 @@ const Gallery = () => {
 
     const base64ToFile = (base64: string, fileName: string, fileType: string): File => {
         const arr = base64.split(',');
-        const mime = arr[0].match(/:(.*?);/)![1];
         const bstr = atob(arr[1]);
         let n = bstr.length;
         const u8arr = new Uint8Array(n);
