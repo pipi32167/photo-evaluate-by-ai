@@ -59,3 +59,5 @@ export const config = {
 };
 
 export default router.handler();
+
+export const maxDuration = 60; 
