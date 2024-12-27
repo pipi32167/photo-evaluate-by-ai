@@ -14,6 +14,7 @@ interface Photo {
     isAnalysisSuccessful: boolean;
     md5: string;
     base64: string;
+    retryCount: number; // Add retry count to track number of retries
 }
 
 interface CustomError extends Error {
@@ -34,7 +35,8 @@ const Gallery = () => {
             const updatedPhotos = parsedPhotos.map((photo: Photo) => ({
                 ...photo,
                 file: base64ToFile(photo.base64, photo.file.name, photo.file.type),
-                previewSrc: photo.base64
+                previewSrc: photo.base64,
+                retryCount: photo.retryCount || 0 // Initialize retry count if not present
             }));
             setPhotos(updatedPhotos);
         }
@@ -108,7 +110,8 @@ const Gallery = () => {
                     error: '',
                     isAnalysisSuccessful: false,
                     md5,
-                    base64
+                    base64,
+                    retryCount: 0 // Initialize retry count
                 });
             }
 
@@ -250,11 +253,14 @@ const Gallery = () => {
                     ...p, result: `
                     <div>${t('analysisResult')}:</div>
                     <div class="markdown-content">${adjustedMarkdownContentWithCenteredText}</div>
-                `, isLoading: false, error: '', isAnalysisSuccessful: true
+                `, isLoading: false, error: '', isAnalysisSuccessful: true, retryCount: 0 // Reset retry count on success
                 } : p
             ));
         } catch (error) {
             handleError(index, error as CustomError);
+            setPhotos(prevPhotos => prevPhotos.map((p, i) =>
+                i === index ? { ...p, retryCount: p.retryCount + 1 } : p // Increment retry count on error
+            ));
         } finally {
             setLoading(index, false);
         }
@@ -276,9 +282,13 @@ const Gallery = () => {
         setCurrentIndex(prevIndex => Math.min(prevIndex + 1, photos.length - 1));
     };
 
+    const handleRetry = () => {
+        uploadPhoto(currentIndex);
+    };
+
     // 自动上传图片
     useEffect(() => {
-        if (photos.length > 0 && !photos[currentIndex].isAnalysisSuccessful && !photos[currentIndex].isLoading) {
+        if (photos.length > 0 && !photos[currentIndex].isAnalysisSuccessful && !photos[currentIndex].isLoading && photos[currentIndex].retryCount < 3) {
             uploadPhoto(currentIndex);
         }
     }, [photos, currentIndex]);
@@ -307,9 +317,13 @@ const Gallery = () => {
                 {photos[currentIndex]?.error && <p className="error-message">{photos[currentIndex].error}</p>}
                 <div className="upload-btn-wrapper">
                     <input type="file" id="photoInput" accept="image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} />
-                    <button className="button" onClick={() => document.getElementById('photoInput')?.click()} disabled={photos[currentIndex]?.isLoading}>
+                    {photos[currentIndex]?.error && (
+                        <button className="button" onClick={handleRetry} disabled={photos[currentIndex]?.isLoading || photos[currentIndex].retryCount >= 3}>
+                            {t('retry')}
+                        </button>
+                    ) || (<button className="button" onClick={() => document.getElementById('photoInput')?.click()} disabled={photos[currentIndex]?.isLoading}>
                         {photos[currentIndex]?.isLoading ? t('analyzing') : t('selectAndAnalyzePhoto')}
-                    </button>
+                    </button>)}
                     {/* {photos[currentIndex]?.isAnalysisSuccessful && (
                         <button className="button" onClick={() => handleShare(currentIndex)} disabled={photos[currentIndex]?.isLoading}>
                             {t('share')}
