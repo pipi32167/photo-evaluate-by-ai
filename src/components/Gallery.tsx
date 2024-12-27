@@ -13,6 +13,7 @@ interface Photo {
     error: string;
     isAnalysisSuccessful: boolean;
     md5: string;
+    base64: string;
 }
 
 interface CustomError extends Error {
@@ -25,6 +26,47 @@ const Gallery = () => {
     const { t, i18n } = useTranslation();
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        const savedPhotos = localStorage.getItem('photos');
+        if (savedPhotos) {
+            const parsedPhotos = JSON.parse(savedPhotos);
+            const updatedPhotos = parsedPhotos.map((photo: Photo) => ({
+                ...photo,
+                file: base64ToFile(photo.base64, photo.file.name, photo.file.type),
+                previewSrc: photo.base64
+            }));
+            setPhotos(updatedPhotos);
+        }
+    }, []);
+
+    useEffect(() => {
+        const photosToSave = photos.map(photo => ({
+            ...photo,
+            base64: photo.previewSrc
+        }));
+        localStorage.setItem('photos', JSON.stringify(photosToSave));
+    }, [photos]);
+
+    const base64ToFile = (base64: string, fileName: string, fileType: string): File => {
+        const arr = base64.split(',');
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], fileName, { type: fileType });
+    };
+
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    };
 
     const calculateMD5 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -45,22 +87,36 @@ const Gallery = () => {
         const files = e.target.files;
         if (files && files.length > 0) {
             const newPhotos: Photo[] = [];
+            let duplicateIndex = -1;
+
             for (const file of Array.from(files)) {
                 const md5 = await calculateMD5(file);
                 const file2 = await resizeImage(file);
-                if (!photos.some(photo => photo.md5 === md5)) {
-                    newPhotos.push({
-                        file,
-                        previewSrc: URL.createObjectURL(file2),
-                        result: '',
-                        isLoading: false,
-                        error: '',
-                        isAnalysisSuccessful: false,
-                        md5,
-                    });
+                const base64 = await fileToBase64(file2);
+
+                const existingPhotoIndex = photos.findIndex(photo => photo.md5 === md5);
+                if (existingPhotoIndex !== -1) {
+                    duplicateIndex = existingPhotoIndex;
+                    break;
                 }
+
+                newPhotos.push({
+                    file,
+                    previewSrc: base64,
+                    result: '',
+                    isLoading: false,
+                    error: '',
+                    isAnalysisSuccessful: false,
+                    md5,
+                    base64
+                });
             }
-            setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
+
+            if (duplicateIndex !== -1) {
+                setCurrentIndex(duplicateIndex);
+            } else {
+                setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
+            }
         }
     };
 
@@ -204,6 +260,14 @@ const Gallery = () => {
         }
     };
 
+    const handleTop = () => {
+        setCurrentIndex(0);
+    };
+
+    const handleBottom = () => {
+        setCurrentIndex(photos.length - 1);
+    };
+
     const handlePrev = () => {
         setCurrentIndex(prevIndex => Math.max(prevIndex - 1, 0));
     };
@@ -218,6 +282,22 @@ const Gallery = () => {
             uploadPhoto(currentIndex);
         }
     }, [photos, currentIndex]);
+
+    // 添加键盘左右键支持
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowLeft') {
+                handlePrev();
+            } else if (event.key === 'ArrowRight') {
+                handleNext();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [photos]);
 
     return (
         <div className="gallery-container">
@@ -239,11 +319,18 @@ const Gallery = () => {
             </div>
             {photos.length > 1 && (
                 <div className="navigation-buttons">
+
+                    <button className="button navigation-button" onClick={handleTop} disabled={currentIndex === 0}>
+                        {t('<<')}
+                    </button>
                     <button className="button navigation-button" onClick={handlePrev} disabled={currentIndex === 0}>
-                        {t('prev')}
+                        {t('<')}
                     </button>
                     <button className="button navigation-button" onClick={handleNext} disabled={currentIndex === photos.length - 1}>
-                        {t('next')}
+                        {t('>')}
+                    </button>
+                    <button className="button navigation-button" onClick={handleBottom} disabled={currentIndex === photos.length - 1}>
+                        {t('>>')}
                     </button>
                 </div>
             )}
