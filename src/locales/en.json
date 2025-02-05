@@ -1,4 +1,13 @@
 {
+  "generatePoemTitle": "Generate Poem",
+  "generatePoem": "Generate Poem",
+  "poem": "Poem",
+  "generatingPhoto": "Generating poem",
+  "errorGeneratingPhoto": "Error generating poem",
+  "generateResult": "Generate Result",
+  "generating": "Generating...",
+  "selectPhoto": "Select Photo",
+
   "Photo Analysis": "Photo Analysis",
   "Photo Upload and Analysis": "Photo Upload and Analysis",
   "Loading...": "Loading...",

@@ -1,8 +1,14 @@
-import { randomInt } from 'crypto';
 import fs from 'fs';
-import { OpenAI } from 'openai';
 import * as xml2js from 'xml2js';
+import { chat as openai_chat } from './openai'
+import { chat as gemini_chat } from './google'
 
+async function chat(prompt: string, base64Image: string) {
+  if (process.env.OPENAI_API_BASE_URL?.includes('googleapis')) {
+    return await gemini_chat(prompt, base64Image)
+  }
+  return await openai_chat(prompt, base64Image)
+}
 
 export function remove_code_block(s: string): string {
 
@@ -88,12 +94,6 @@ ${summary}
 }
 
 async function evaluate_by_vlm(image_path: string, lang: string): Promise<string> {
-  // Initialize OpenAI client
-  const openai = new OpenAI({
-    baseURL: process.env.OPENAI_API_BASE_URL,
-    apiKey: process.env.OPENAI_API_KEY,
-    defaultHeaders: { "x-foo": "true" },
-  });
 
   // Read and encode image
   const imageBuffer = fs.readFileSync(image_path);
@@ -263,42 +263,37 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
   // console.log('prompt:\n', prompt)
 
   // Call OpenAI API
-  const response = await openai.chat.completions.create({
-
-    model: process.env.OPENAI_API_MODEL || 'gpt-4o-mini',
-    seed: randomInt(1000000),
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: prompt,
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: `data:image/jpeg;base64,${base64Image}`
-            }
-          }
-        ]
-      }
-    ],
-    max_tokens: 2048,
-    temperature: 0.1,
-  });
-
-  const result = response.choices[0].message.content;
-  if (!result) {
-    throw new Error(`invalid response: ${response}`)
-  }
-  console.log('result', result)
+  const result = await chat(prompt, base64Image);
   return result
+}
+
+export function get_section(xml: string, section_name: string, keep_section_tag: boolean = false): string {
+  const start_tag = `<${section_name}>`
+  const end_tag = `</${section_name}>`
+  const start_index = xml.indexOf(start_tag)
+  const end_index = xml.indexOf(end_tag)
+  let section = xml.slice(start_index, end_index + end_tag.length)
+  if (!keep_section_tag) {
+    section = section.replace(start_tag, '').replace(end_tag, '')
+  }
+  return section
+}
+
+
+async function fix_xml(xml: string): Promise<string> {
+  return await chat(`修复xml格式` + xml, '')
 }
 
 export async function photo_evaluate({ image_path, lang }: { image_path: string, lang: string }) {
 
   let result = await evaluate_by_vlm(image_path, lang)
+  result = get_section(result, 'image_review', true)
+  try {
+    await new xml2js.Parser().parseStringPromise(result);
+  } catch (error) {
+    result = await fix_xml(result)
+  }
+
   result = await correct_total_score(result)
   return await xml_to_markdown(result)
 }

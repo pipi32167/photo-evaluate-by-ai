@@ -1,4 +1,4 @@
-import { correct_total_score, xml_to_markdown, remove_code_block } from './llm_score';
+import { correct_total_score, xml_to_markdown, remove_code_block, get_section } from './llm_score';
 
 describe('correct_total_score', () => {
     it('should return the original XML if the total score is correct', async () => {
@@ -153,3 +153,41 @@ describe('remove_code_block', () => {
         expect(remove_code_block(input)).toBe(expectedOutput);
     });
 }); 
+
+describe('get_section', () => {
+    it('should get section correctly', () => {
+        const input = `
+        haha1
+        <test>haha2</test>
+        haha3
+        `;
+        const expectedOutput = "<test>haha2</test>";
+        expect(get_section(input, 'test', true)).toBe(expectedOutput);
+    });
+});
+
+describe('xml_to_markdown', () => {
+    it("should get markdown correctly", async () => {
+        const xml = `<image_review>
+  <image_description>
+    这张照片展示了著名的好牧羊人教堂，它坐落在一个开阔的草地上，背景是壮丽的日落天空和远处的山脉。教堂由石头砌成，拥有一个标志性的尖顶。通往教堂的路径由碎石铺成，两侧是低矮的石墙和金属栅栏。前景中生长着茂盛的金色草丛，为画面增添了自然的质感。天空呈现出迷人的色彩渐变，从顶部的深蓝色过渡到地平线附近的粉红色和橙色，预示着日落时分。
+  </image_description>
+  <scoring>
+    <composition score="22" max_score="25">主体位置良好，教堂位于画面右侧，符合三分法原则，并留有足够的空间展现背景的壮丽景色。背景简洁，日落的天空和远山有效地衬托了教堂。画面具有一定的层次感，前景的草地、中景的教堂和远景的山脉依次展开。对称性方面，教堂本身具有一定的对称结构。通往教堂的路径和栅栏形成了一些引导视线的线条，将观众的目光引向主体。</composition>
+    <exposure score="4" max_score="5">照片的亮度恰当，天空和地面的细节都得到了保留，没有明显的过曝或欠曝。阴影部分在教堂的背光面，增强了画面的立体感。光线柔和，是典型的日落时分的自然光，营造了宁静祥和的氛围。</exposure>
+    <color score="5" max_score="5">色调和谐统一，天空的蓝色、粉色和橙色与地面草地的金色形成了美丽的对比，符合日落的主题。饱和度适中，色彩鲜明但不失自然。色彩搭配非常出色，天空的暖色调与教堂的冷色调相互映衬，视觉冲击力强。</color>
+    <detail score="4" max_score="5">画面清晰度足够，教堂的石块纹理、草地的细节以及远处山脉的轮廓都清晰可见。纹理表现良好，石墙、草地和天空的质感都得到了体现。对比度适中，增强了画面的视觉冲击力，但可能在某些阴影区域损失了一些细节。</detail>
+    <aesthetic_appeal score="9" max_score="10">照片能够唤起观者对宁静、祥和以及自然之美的感受。日落的色彩和教堂的静谧感营造了强烈的视觉冲击力。照片具有一定的故事性，让人联想到在美丽的自然环境中祈祷和冥想的场景。构图和光线的运用都展现了摄影师的创意。</aesthetic_appeal>
+    <total_score score="44" max_score="50"/>
+  </scoring>
+  <suggestions_for_improvement>
+* **构图改进**: 可以尝试略微调整拍摄角度，例如稍微降低机位，以更突出前景草地的纹理，或者稍微向左移动，让教堂更符合黄金分割的交点。
+* **细节改进**:  在后期处理时，可以稍微提亮阴影部分，以展现更多教堂背光面的细节，但要注意保持画面的自然感。
+  </suggestions_for_improvement>
+  <summary>
+这张照片是一幅优秀的风景摄影作品，成功地捕捉到了好牧羊人教堂在日落时分的宁静和美丽。构图合理，色彩迷人，曝光恰当，细节清晰，具有很强的审美价值。摄影师巧妙地利用了自然光线和周围环境，创造出一幅令人印象深刻的画面。虽然已经很出色，但仍有一些细微之处可以进一步提升，例如更精细的构图调整和阴影细节的优化。
+  </summary>
+</image_review>`
+        xml_to_markdown(xml)
+    })
+})

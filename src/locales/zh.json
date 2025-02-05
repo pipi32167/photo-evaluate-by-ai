@@ -1,4 +1,13 @@
 {
+  "generatePoemTitle": "生成诗歌",
+  "generatePoem": "生成诗歌",
+  "poem": "诗歌",
+  "generatingPhoto": "生成诗歌",
+  "errorGeneratingPhoto": "生成诗歌时出错",
+  "generateResult": "生成结果",
+  "generating": "生成...",
+  "selectPhoto": "选择照片",
+
   "Photo Analysis": "照片分析",
   "Photo Upload and Analysis": "照片上传与分析",
   "Loading...": "加载中...",

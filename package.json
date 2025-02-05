@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@vercel/analytics": "^1.4.1",
     "crypto-js": "^4.2.0",
     "html2canvas": "^1.4.1",

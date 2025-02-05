@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 
 import Gallery from '@/components/Gallery';
 import '@/styles/Gallery.css';
+import Poem from '@/components/Poem';
 
 
 const Home = () => {
@@ -21,11 +22,11 @@ const Home = () => {
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 </Head>
                 <main>
-                    <h1>{t('Photo Analysis')}</h1>
+                    {/* <h1>{t('Photo Analysis')}</h1> */}
                     {/* <PhotoUpload /> */}
 
-                    <Gallery />
-
+                    {/* <Gallery /> */}
+                    <Poem />
                 </main>
             </div>
         </Suspense>

@@ -2,7 +2,8 @@ import fs from "fs";
 import path from "path";
 import { createRouter } from "next-connect";
 import multer from "multer";
-import { photo_evaluate } from "@/utils/llm_score";
+import { chat as chat_with_img } from "@/utils/openai";
+import { chat as chat_with_reasoner } from "@/utils/deepseek";
 
 // Configure multer to store files in memory
 const upload = multer({
@@ -13,6 +14,20 @@ const upload = multer({
 const router = createRouter();
 
 router.use(upload.single("image"));
+
+async function analyse_image({
+  image_path,
+  lang,
+  prompt = "详细描述这张图片，并思考其可用于作诗的意象。",
+}) {
+  const base64Image = await fs.promises.readFile(image_path, {
+    encoding: "base64",
+  });
+
+  const response = await chat_with_img(prompt, base64Image);
+
+  return response;
+}
 
 router.post(async (req, res) => {
   try {
@@ -32,9 +47,10 @@ router.post(async (req, res) => {
     await fs.promises.writeFile(tempFilePath, imageFile.buffer);
 
     // Call the evaluation function
-    const response = await photo_evaluate({
+    const response = await analyse_image({
       image_path: tempFilePath,
       lang: req.body.lang,
+      prompt: req.body.prompt,
     });
 
     // Remove the temporary file
