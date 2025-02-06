@@ -6,7 +6,7 @@ export async function chat(prompt: string): Promise<string> {
   const openai = new OpenAI({
     baseURL: process.env.OPENAI_API_BASE_URL2,
     apiKey: process.env.OPENAI_API_KEY2,
-    defaultHeaders: { "x-foo": "true" },
+    // defaultHeaders: { "x-foo": "true" },
   });
 
   const messages: [any] = [
@@ -28,7 +28,7 @@ export async function chat(prompt: string): Promise<string> {
     max_tokens: 2048,
     temperature: 0.7,
   });
-  // console.log('response:', response);
+  console.log('response:', response);
 
   const result = response.choices[0].message.content;
   if (!result) {

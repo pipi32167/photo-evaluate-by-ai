@@ -15,34 +15,46 @@ const router = createRouter();
 
 router.use(upload.single("image"));
 
-async function generate_poem({ lang, prompt, imageDesc }) {
-  const prompt2 = `  
-\`\`\`txt
-${imageDesc}
-\`\`\`
-请基于图片的描述，创作一首古诗词。
-1. 请先进行深度思考。深度思考的内容放在<div class="think">标签中。
-2. 根据深度思考的内容，创作一首古诗词。古诗词的内容放在<div class="poem">标签中。
-3. 最终的结果生成一个 svg，放在<svg>标签中。使用宋体字体，字号 24，行间距 1.5 倍行高。风格古意盎然。请针对诗词的长度进行调整，使得诗词的长度适中。
-`;
-  console.log("prompt2", prompt2);
-  const response2 = await chat_with_reasoner(prompt2);
+async function generate_poem({ lang, prompt }) {
+  const response2 = await chat_with_reasoner(prompt);
   console.log("response2", response2);
-
   return response2;
 }
 
 router.post(async (req, res) => {
   try {
-    if (!req.body.image_desc || req.body.image_desc === "") {
-      return res.status(400).json({ error: "No image description" });
+    if (!req.body.prompt || req.body.prompt === "") {
+      return res.status(400).json({ error: "No prompt" });
     }
     // Call the evaluation function
-    const response = await generate_poem({
-      lang: req.body.lang,
-      prompt: req.body.prompt,
-      imageDesc: req.body.image_desc,
-    });
+    // const response = await generate_poem({
+    //   lang: req.body.lang,
+    //   prompt: req.body.prompt,
+    // });
+
+    const response = `
+<poem>
+**倒影中的独白**
+
+苔痕咬住铸铁，长椅在石墙低矮处
+盛满十二月的风
+你解开发髻，放出整条河流的金黄
+在群山环抱的缺口处
+湖水正吞咽自己的银匙
+
+镜面生长着倒置的松林
+苔原沿脊椎攀援而上
+一千只天鹅沉睡在褶皱的蓝里
+直到你的呼吸漫过堤岸
+在岩石唇间留下咸涩的刻度
+
+远峰用积雪写信
+每个标点都坠成盘旋的鹰
+而云层堆积成未拆的信封
+悬在发梢，悬在
+所有未曾说出的地名之上
+</poem>
+    `;
 
     // Ensure we send a response
     return res.status(200).json({ result: response });

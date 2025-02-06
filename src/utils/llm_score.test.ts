@@ -1,4 +1,5 @@
-import { correct_total_score, xml_to_markdown, remove_code_block, get_section } from './llm_score';
+import { correct_total_score, xml_to_markdown, remove_code_block } from './llm_score';
+import { get_section } from './xml';
 
 describe('correct_total_score', () => {
     it('should return the original XML if the total score is correct', async () => {
@@ -14,7 +15,7 @@ describe('correct_total_score', () => {
             </scoring>
         </image_review>
         `;
-        
+
         const result = await correct_total_score(xml);
         expect(result).toBe(xml);
     });
@@ -32,7 +33,7 @@ describe('correct_total_score', () => {
             </scoring>
         </image_review>
         `;
-        
+
         // const expectedXml = `
         // <image_review>
         //     <scoring>
@@ -152,7 +153,7 @@ describe('remove_code_block', () => {
         const expectedOutput = '<test>hahaha</test>';
         expect(remove_code_block(input)).toBe(expectedOutput);
     });
-}); 
+});
 
 describe('get_section', () => {
     it('should get section correctly', () => {

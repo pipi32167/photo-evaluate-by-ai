@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.21.0",
     "@vercel/analytics": "^1.4.1",
     "crypto-js": "^4.2.0",
+    "fs": "^0.0.1-security",
     "html2canvas": "^1.4.1",
     "i18next": "^24.1.0",
     "i18next-browser-languagedetector": "^8.0.2",

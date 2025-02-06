@@ -2,6 +2,7 @@ import fs from 'fs';
 import * as xml2js from 'xml2js';
 import { chat as openai_chat } from './openai'
 import { chat as gemini_chat } from './google'
+import { get_section } from './xml';
 
 async function chat(prompt: string, base64Image: string) {
   if (process.env.OPENAI_API_BASE_URL?.includes('googleapis')) {
@@ -266,19 +267,6 @@ async function evaluate_by_vlm(image_path: string, lang: string): Promise<string
   const result = await chat(prompt, base64Image);
   return result
 }
-
-export function get_section(xml: string, section_name: string, keep_section_tag: boolean = false): string {
-  const start_tag = `<${section_name}>`
-  const end_tag = `</${section_name}>`
-  const start_index = xml.indexOf(start_tag)
-  const end_index = xml.indexOf(end_tag)
-  let section = xml.slice(start_index, end_index + end_tag.length)
-  if (!keep_section_tag) {
-    section = section.replace(start_tag, '').replace(end_tag, '')
-  }
-  return section
-}
-
 
 async function fix_xml(xml: string): Promise<string> {
   return await chat(`修复xml格式` + xml, '')
